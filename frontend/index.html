@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- CSS only -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+  <title>Document</title>
+</head>
+
+<body>
+
+  <div class="container">
+    <form method="POST" class="mt-4 col col-md-6 m-auto" id="form">
+      <h1>
+        Login
+      </h1>
+      <div class="mb-3">
+        <label for="email" class="form-label">Email address</label>
+        <input type="email" name="email" value="" class="form-control" id="email"
+          aria-describedby="emailHelp">
+        <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+      </div>
+      <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <input type="password" value="" name="password" class="form-control" id="password">
+      </div>
+      <button type="submit" class="btn btn-primary">Login</button>
+      <button type="button" id="btn_check_auth" class="btn btn-success">Auth check</button>
+    </form>
+    <div class="wrapper__mensage mt-4 col col-md-6 m-auto">
+    </div>
+  </div>
+
+  <!-- JavaScript Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous">
+  </script>
+
+  <!-- Axios -->
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    const form = document.querySelector('#form');
+    const btnAuth = document.querySelector('#btn_check_auth');
+    const wrapperMensage = document.querySelector('.wrapper__mensage');
+
+    axios.defaults.baseURL = 'http://localhost:3000';
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      try {
+        const formData = new FormData(event.target);
+
+        const { data } = await axios.post('login.php', formData);
+        
+        sessionStorage.setItem('userLogin', data);
+        wrapperMensage.innerHTML="";
+        console.log(data);
+      } catch (error) {
+        wrapperMensage.innerHTML = `
+          <div class="alert__container alert alert-danger" role="alert">
+            ${error.response.data.message}
+          </div>
+        `
+        console.log(error);
+      }
+    });
+
+    btnAuth.addEventListener('click', async () => {
+      try {
+        const authSession = 'Bearer '+sessionStorage.getItem('userLogin');
+
+        const { data } = await axios.get('auth.php',{
+          headers: {
+            "Authorization": authSession
+          }
+        });
+
+        console.log(data);
+        if( data === 'Expired token'){
+          return wrapperMensage.innerHTML = `
+            <div class="alert__container alert alert-danger" role="alert">
+              ${data}
+            </div>
+          `
+        }
+        
+        wrapperMensage.innerHTML = `
+          <div class="alert__container alert alert-success" role="alert">
+            hi, <strong>${data.content.name}</strong> you're logged in
+          </div>
+        `
+        
+      } catch (error) {
+        if (localStorage.getItem("userLogin") === null) {
+          return wrapperMensage.innerHTML = `
+            <div class="alert__container alert alert-danger" role="alert">
+              You're not a token
+            </div>
+          `
+        }
+
+        wrapperMensage.innerHTML = `
+          <div class="alert__container alert alert-danger" role="alert">
+            ${error}
+          </div>
+        `
+      }
+    });
+  </script>
+</body>
+
+</html>
