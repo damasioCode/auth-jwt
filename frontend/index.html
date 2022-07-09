@@ -19,10 +19,8 @@
         Login
       </h1>
       <div class="mb-3">
-        <label for="email" class="form-label">Email address</label>
-        <input type="email" name="email" value="" class="form-control" id="email"
-          aria-describedby="emailHelp">
-        <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+        <label for="email" class="form-label">Email</label>
+        <input type="email" name="email" value="" class="form-control" id="email" >
       </div>
       <div class="mb-3">
         <label for="password" class="form-label">Password</label>
@@ -57,7 +55,11 @@
         const { data } = await axios.post('login.php', formData);
         
         sessionStorage.setItem('userLogin', data);
-        wrapperMensage.innerHTML="";
+        wrapperMensage.innerHTML=`
+        <div class="alert__container alert alert-success" role="alert">
+          Logged in successfully!
+        </div>
+        `;
         console.log(data);
       } catch (error) {
         wrapperMensage.innerHTML = `
